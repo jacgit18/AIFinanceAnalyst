@@ -132,5 +132,5 @@ def main(symbol):
     print(f"Sentiment Score: {sentiment:.2f}")
 
 if __name__ == "__main__":
-    symbol = "TATATECH.NS"
+    symbol = "BLK"
     main(symbol)
