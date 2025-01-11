@@ -1,4 +1,6 @@
 import os
+from datetime import date
+
 from dotenv import load_dotenv
 from openai import OpenAI
 import yfinance as YFinanceTools
@@ -11,6 +13,9 @@ load_dotenv()
 # Set up the Perplexity API client
 PERPLEXITY_API_KEY = os.getenv("PERPLEXITY_API_KEY")
 client = OpenAI(api_key=PERPLEXITY_API_KEY, base_url="https://api.perplexity.ai")
+
+
+
 
 def get_financial_statements(symbol):
     ticker = YFinanceTools.Ticker(symbol)
@@ -69,7 +74,7 @@ def financial_data_agent(symbol):
         {
             "role": "system",
             "content" : f"""You are a financial analysis assistant, use this data {stock_info} and perform this task: Your task is to provide a detailed summary of {symbol} stock predictions from top analysts. Please follow these instructions:
-                        1. Create a table with the following columns: Analyst, Firm, Accuracy, Stock, price Prediction, upside or downside percentage and Tentative Date (Format :year and Quater).
+                        1. Create a table with the following columns: Analyst, Firm, Accuracy, Stock, price Prediction, upside or downside percentage and Tentative Date (Format :year and Quater and the show result only of future dates, todays date is : {date.today()}).
                         2. Fill the table with data for at least 5 different analysts, including their name, firm, accuracy percentage, the stock they're analyzing, their prediction (including percentage and direction), and the date by which they expect their prediction to materialize.
                         3. After the first table, create a second table with two columns: Analyst and Accuracy Rating (1-10 scale).
                         4. In this second table, list the same analysts from the first table, but convert their accuracy percentage to a 1-10 scale (e.g., 87% becomes 8.7).
@@ -84,14 +89,14 @@ def financial_data_agent(symbol):
     ]
     
     response = client.chat.completions.create(
-        model="llama-3.1-sonar-large-128k-online",
+        model="llama-3.1-sonar-huge-128k-online",
         messages=messages,
     )
     return response.choices[0].message.content
 
 
 def web_search_sentiment_agent(symbol):
-    search_results = DDGS().text(f"{symbol} stock news latest financial sheets technical indicators", max_results=10)
+    search_results = DDGS().text(f"{symbol} stock news latest financial sheets technical indicators", max_results=100)
     
     messages = [
         {
@@ -127,5 +132,5 @@ def main(symbol):
     print(f"Sentiment Score: {sentiment:.2f}")
 
 if __name__ == "__main__":
-    symbol = "TSLA"
+    symbol = "BLK"
     main(symbol)
