@@ -73,7 +73,7 @@ def financial_data_agent(symbol):
     messages = [
         {
             "role": "system",
-            "content" : f"""You are a financial analysis assistant, use this data {stock_info} and perform this task: Your task is to provide a detailed summary of {symbol} stock predictions from top analysts. Please follow these instructions:
+            "content" : f"""You are a financial analysis assistant, use this data {stock_info} And provide your AI prediction as per yourr calculations and add the name of your entry as AI in Analyst column and as well as provide a detailed summary of {symbol} stock predictions from top analysts. Please follow these instructions:
                         1. Create a table with the following columns: Analyst, Firm, Accuracy, Stock, price Prediction, upside or downside percentage and Tentative Date (Format :year and Quater and the show result only of future dates, todays date is : {date.today()}).
                         2. Fill the table with data for at least 5 different analysts, including their name, firm, accuracy percentage, the stock they're analyzing, their prediction (including percentage and direction), and the date by which they expect their prediction to materialize.
                         3. After the first table, create a second table with two columns: Analyst and Accuracy Rating (1-10 scale).
@@ -89,7 +89,7 @@ def financial_data_agent(symbol):
     ]
     
     response = client.chat.completions.create(
-        model="llama-3.1-sonar-huge-128k-online",
+        model="llama-3.1-sonar-large-128k-online",
         messages=messages,
     )
     return response.choices[0].message.content
@@ -110,7 +110,7 @@ def web_search_sentiment_agent(symbol):
     ]
     
     response = client.chat.completions.create(
-        model="llama-3.1-sonar-huge-128k-online",  # Using a different Perplexity model
+        model="llama-3.1-sonar-large-128k-online",  # Using a different Perplexity model
         messages=messages,
     )
     analysis = response.choices[0].message.content
@@ -132,5 +132,5 @@ def main(symbol):
     print(f"Sentiment Score: {sentiment:.2f}")
 
 if __name__ == "__main__":
-    symbol = "BLK"
+    symbol = "TATATECH.NS"
     main(symbol)
