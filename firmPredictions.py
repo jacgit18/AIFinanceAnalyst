@@ -1,8 +1,7 @@
 import os
 from dotenv import load_dotenv
 from openai import OpenAI
-from phi.tools.yfinance import YFinanceTools
-from phi.tools.duckduckgo import DuckDuckGo
+import yfinance as YFinanceTools
 from textblob import TextBlob
 from duckduckgo_search import DDGS
 
@@ -13,21 +12,55 @@ load_dotenv()
 PERPLEXITY_API_KEY = os.getenv("PERPLEXITY_API_KEY")
 client = OpenAI(api_key=PERPLEXITY_API_KEY, base_url="https://api.perplexity.ai")
 
-# Initialize tools
-yfinance_tools = YFinanceTools(stock_price=True, analyst_recommendations=True, company_info=True, company_news=True)
-duckduckgo_tool = DuckDuckGo()
+def get_financial_statements(symbol):
+    ticker = YFinanceTools.Ticker(symbol)
+    income_statement = ticker.financials
+    balance_sheet = ticker.balance_sheet
+    cash_flow = ticker.cashflow
+    return income_statement, balance_sheet, cash_flow
+
+ # Fetch important financial ratios and statistics:
+def get_key_stats(symbol):
+    ticker = YFinanceTools.Ticker(symbol)
+    return ticker.info
+
+# Retrieve historical price data for technical analysis:
+def get_historical_data(symbol, period="1y", interval="1d"):
+    ticker = YFinanceTools.Ticker(symbol)
+    return ticker.history(period=period, interval=interval)
+
+# Information about major shareholders:
+def get_institutional_holders(symbol):
+    ticker = YFinanceTools.Ticker(symbol)
+    return ticker.institutional_holders
+
+# Retrieve earnings and revenue forecasts:
+def get_earnings_forecast(symbol):
+    ticker = YFinanceTools.Ticker(symbol)
+    return ticker.income_stmt
 
 def get_stock_info(symbol):
-    stock_price = yfinance_tools.get_current_stock_price(symbol)
-    analyst_recommendations = yfinance_tools.get_analyst_recommendations(symbol)
-    company_info = yfinance_tools.get_company_info(symbol)
-    company_news = yfinance_tools.get_company_news(symbol)
-    
+    ticker = YFinanceTools.Ticker(symbol)
+    stock_price = ticker.info.get('currentPrice', 'N/A')
+    analyst_recommendations = ticker.recommendations
+    company_info = ticker.info
+    company_news = ticker.news
+    financial_statements = get_financial_statements(symbol)
+    key_stats = get_key_stats(symbol)
+    historical_data = get_historical_data(symbol)
+    institutional_holders = get_institutional_holders(symbol)
+    earnings_forecast = get_earnings_forecast(symbol)
+
     return f"""
     Stock Price: {stock_price}
     Analyst Recommendations: {analyst_recommendations}
     Company Info: {company_info}
     Recent News: {company_news}
+    Financial Statements: {financial_statements}
+    Key Stats: {key_stats}
+    Historical Data: {historical_data}
+    Institutional Holders: {institutional_holders}
+    Earnings Forecast: {earnings_forecast}
     """
 
 def financial_data_agent(symbol):
@@ -35,8 +68,8 @@ def financial_data_agent(symbol):
     messages = [
         {
             "role": "system",
-            "content" : f"""You are a financial analysis assistant. Your task is to provide a detailed summary of {symbol} stock predictions from top analysts. Please follow these instructions:
-                        1. Create a table with the following columns: Analyst, Firm, Accuracy, Stock, Prediction, and Tentative Date.
+            "content" : f"""You are a financial analysis assistant, use this data {stock_info} and perform this task: Your task is to provide a detailed summary of {symbol} stock predictions from top analysts. Please follow these instructions:
+                        1. Create a table with the following columns: Analyst, Firm, Accuracy, Stock, price Prediction, upside or downside percentage and Tentative Date (Format :year and Quater).
                         2. Fill the table with data for at least 5 different analysts, including their name, firm, accuracy percentage, the stock they're analyzing, their prediction (including percentage and direction), and the date by which they expect their prediction to materialize.
                         3. After the first table, create a second table with two columns: Analyst and Accuracy Rating (1-10 scale).
                         4. In this second table, list the same analysts from the first table, but convert their accuracy percentage to a 1-10 scale (e.g., 87% becomes 8.7).

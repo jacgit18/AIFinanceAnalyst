@@ -18,7 +18,7 @@ source ~/.venvs/aienv/bin/activate
 
 ### Step 2: Export your Perplexity API key
 
-Set your Perplexity API key as an environment variable:
+Set your Perplexity API key as an environment variable or add it in .env file
 
 ```bash
 export OPENAI_API_KEY=pplx-*************
