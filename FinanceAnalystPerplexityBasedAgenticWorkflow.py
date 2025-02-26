@@ -94,5 +94,5 @@ def main(symbol):
     print(f"Sentiment Score: {sentiment:.2f}")
 
 if __name__ == "__main__":
-    symbol = "TSLA"
+    symbol = "PLTR"
     main(symbol)
